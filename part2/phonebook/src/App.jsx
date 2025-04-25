@@ -6,11 +6,34 @@ import Persons from './components/Persons'
 import personService from './services/persons'
 
 
+const Notification = ({ message }) => {
+  const notificationStyle = {
+    color: 'green',
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  }
+
+  if (message === '') {
+    return null
+  }
+
+  return (
+    <div style={notificationStyle}>
+      {message}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     console.log('effect')
@@ -24,6 +47,11 @@ const App = () => {
   
   const addPerson = (event) => {
     event.preventDefault();
+    if (newName === '' || newNumber === '') {
+      console.log('Name or number field is empty');
+      alert('Please fill in both name and number fields.');
+      return;
+    }
   
     const existingPerson = persons.find(person => person.name === newName);
   
@@ -53,11 +81,19 @@ const App = () => {
           person.id !== personToUpdate.id ? person : returnedPerson
         ));
         resetForm();
+        setSuccessMessage(
+          `Person '${returnedPerson.name}' updated successfully!`
+        )
+        setTimeout(() => {
+          setSuccessMessage('')
+        }, 5000)
       })
       .catch(error => {
         alert(`Failed to update ${newName}. It might have been removed from the server.`);
         setPersons(persons.filter(person => person.id !== personToUpdate.id));
       });
+    
+      
   };
   
   const handleCreatePerson = () => {
@@ -68,6 +104,12 @@ const App = () => {
       .then(returnedPerson => {
         setPersons(persons.concat(returnedPerson));
         resetForm();
+        setSuccessMessage(
+          `Person '${returnedPerson.name}' added successfully!`
+        );
+        setTimeout(() => {
+          setSuccessMessage('')
+        }, 5000);
       })
       .catch(error => {
         alert('Failed to add the person. Please try again.');
@@ -113,6 +155,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={successMessage}/>
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h2>Add a new</h2>
       <PersonForm
