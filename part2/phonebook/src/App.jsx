@@ -6,9 +6,12 @@ import Persons from './components/Persons'
 import personService from './services/persons'
 
 
-const Notification = ({ message }) => {
+const Notification = ({ message, messageType }) => {
+
+  const color = messageType === 'error' ? 'red' : 'green';
+
   const notificationStyle = {
-    color: 'green',
+    color: color,
     background: 'lightgrey',
     fontSize: 20,
     borderStyle: 'solid',
@@ -33,7 +36,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  const [message, setMessage] = useState('')
+  const [messageTypeState, setMessageType] = useState('')
 
   useEffect(() => {
     console.log('effect')
@@ -48,8 +52,14 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault();
     if (newName === '' || newNumber === '') {
-      console.log('Name or number field is empty');
-      alert('Please fill in both name and number fields.');
+      setMessageType('error')
+      setMessage(
+        'Please fill in both name and number fields.'
+      )
+      setTimeout(() => {
+        setMessage('')
+        setMessageType('')
+      }, 5000)
       return;
     }
   
@@ -81,15 +91,22 @@ const App = () => {
           person.id !== personToUpdate.id ? person : returnedPerson
         ));
         resetForm();
-        setSuccessMessage(
+        setMessage(
           `Person '${returnedPerson.name}' updated successfully!`
         )
         setTimeout(() => {
-          setSuccessMessage('')
+          setMessage('')
         }, 5000)
       })
       .catch(error => {
-        alert(`Failed to update ${newName}. It might have been removed from the server.`);
+        setMessageType('error')
+        setMessage(
+          `Information of '${newName}' has already been removed from server.`
+        )
+        setTimeout(() => {
+          setMessage('')
+          setMessageType('')
+        }, 5000)
         setPersons(persons.filter(person => person.id !== personToUpdate.id));
       });
     
@@ -104,15 +121,22 @@ const App = () => {
       .then(returnedPerson => {
         setPersons(persons.concat(returnedPerson));
         resetForm();
-        setSuccessMessage(
+        setMessage(
           `Person '${returnedPerson.name}' added successfully!`
         );
         setTimeout(() => {
-          setSuccessMessage('')
+          setMessage('')
         }, 5000);
       })
       .catch(error => {
-        alert('Failed to add the person. Please try again.');
+        setMessageType('error')
+        setMessage(
+          `Information of '${newName}' has already been removed from server.`
+        )
+        setTimeout(() => {
+          setMessage('')
+          setMessageType('')
+        }, 5000)
       });
   };
   
@@ -136,7 +160,14 @@ const App = () => {
         }
         )
         .catch(error => {
-          alert(`Information of ${name} has already been removed from server`)
+          setMessageType('error')
+          setMessage(
+            `Information of '${name}' has already been removed from server.`
+          )
+          setTimeout(() => {
+            setMessage('')
+            setMessageType('')
+          }, 5000)
           setPersons(persons.filter(person => person.id !== id))
         })
     }
@@ -155,7 +186,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={successMessage}/>
+      <Notification message={message} messageType={messageTypeState}/>
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h2>Add a new</h2>
       <PersonForm
