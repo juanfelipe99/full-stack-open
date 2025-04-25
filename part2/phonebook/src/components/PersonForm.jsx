@@ -1,5 +1,5 @@
-const PersonForm = ({ addName, newName, handleNameChange, newNumber, handleNumberChange }) => (
-    <form onSubmit={addName}>
+const PersonForm = ({ addPerson, newName, handleNameChange, newNumber, handleNumberChange }) => (
+    <form onSubmit={addPerson}>
       <div>
         name: <input value={newName} onChange={handleNameChange} />
       </div>
