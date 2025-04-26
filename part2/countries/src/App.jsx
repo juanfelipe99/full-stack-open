@@ -1,7 +1,49 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+const api_key = import.meta.env.VITE_SOME_KEY
+
+const weatherApi = (lat, lon) => {
+  return axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${api_key}&units=metric`)
+    .then(response => {
+      console.log(response.data.weather[0].icon)
+      return response.data
+    }).catch(error => {
+      console.error('Error fetching weather data:', error)
+      return null
+    }
+  )
+}
+
+const WeatherIcon = ({ icon }) => {
+  const iconUrl = `https://openweathermap.org/img/wn/${icon}@2x.png`
+  return <img src={iconUrl} alt="Weather icon" />
+}
+
+const Weather = ({ weather }) => {
+  if (!weather) {
+    return null
+  }
+  return (
+    <div>
+      <h2>Weather in {weather.name}</h2>
+      <p>Temperature: {weather.main.temp} °C</p>
+      <WeatherIcon icon={weather.weather[0].icon} />
+      <p>Wind: {weather.wind.speed} m/s</p>
+    </div>
+  )
+}
+
 const Country = ({ country }) => {
+  const [weather, setWeather] = useState(null)
+
+  useEffect(() => {
+    if (country.capitalInfo.latlng) {
+      const [lat, lon] = country.capitalInfo.latlng
+      weatherApi(lat, lon).then(data => setWeather(data))
+    }
+  }, [country])
+
   return (
     <div>
     <h1>{country.name.common}</h1>
@@ -14,6 +56,7 @@ const Country = ({ country }) => {
       ))}
     </ul>
     <img src={country.flags.png} alt="flag" />
+    <Weather weather={weather} />
     </div>
   )
 }
