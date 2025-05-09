@@ -58,13 +58,14 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
     const id = request.params.id
+    console.log(`deleting id ${id} in backend`)
     persons = persons.filter(person => person.id !== id)
 
     response.status(204).end()
 })
 
 const generateId = () => {
-    const id = Math.floor(Math.random() * 1000000);
+    const id = Math.floor(Math.random() * 1000000).toString();
     return id
 }
 
