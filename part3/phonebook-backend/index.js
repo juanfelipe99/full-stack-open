@@ -1,15 +1,19 @@
 require('dotenv').config()
 const express = require('express');
-const morgan = require('morgan');
 const Person = require('./models/person')
+const morgan = require('morgan');
 
 const app = express();
 
 app.use(express.json());
 app.use(express.static('dist'))
 
-morgan.token('body', (req) => req.body ? JSON.stringify(req.body) : '');
-
+morgan.token('body', (req) => {
+  if (req.method === 'POST' || req.method === 'PUT') {
+    return JSON.stringify(req.body);
+  }
+  return '';
+});
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
 app.get('/api/persons', (request, response) => {
@@ -19,30 +23,43 @@ app.get('/api/persons', (request, response) => {
 });
 
 app.get('/info', (request, response) => {
-    const date = new Date()
-    const info = `<p>Phonebook has info for ${persons.length} people</p>`
-    const dateInfo = `<p>${date}</p>`
-    console.log(info + dateInfo)
-    response.send(info + dateInfo)
+    Person.find({}).countDocuments().then(count => {
+        const date = new Date()
+        const info = `<p>Phonebook has info for ${count} people</p>`
+        const dateInfo = `<p>${date}</p>`
+        console.log(info + dateInfo)
+        response.send(info + dateInfo)
+    })
 });
 
 app.get('/api/persons/:id', (request, response) => {
     const id = request.params.id
-    const person = persons.find(person => person.id === id)
-
-    if (person) {
+    Person.findById(id)
+    .then(person => {
+        if (person === null) {
+            return response.status(404).send('<h1>Person Not Found</h1>')
+        } else {
+            console.log(`found person ${person.name} with id ${id}`)
+        }
         response.json(person)
-    } else {
-        response.status(404).send('<h1>Person not found</h1>')
-    }
+    })
+    .catch(error => {
+        console.log(error)
+        response.status(404).send('<h1>Person Not Found</h1>')
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
     const id = request.params.id
     console.log(`deleting id ${id} in backend`)
-    persons = persons.filter(person => person.id !== id)
-
-    response.status(204).end()
+    Person.findByIdAndRemove(id)
+        .then(() => {
+            response.status(204).end()
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(404).send({ error: 'Person not found' })
+        })
 })
 
 const generateId = () => {
@@ -59,22 +76,14 @@ app.post('/api/persons', (request, response) => {
         })
     };
 
-    const existingPerson = persons.find(person => person.name === body.name)
-    if (existingPerson) {
-        return response.status(400).json({ 
-            error: 'name must be unique' 
-        })
-    };
-
-    const person = {
+    const person = new Person({
         name: body.name,
         number: body.number,
-        id: generateId(),
-    };
+    })
 
-    persons = persons.concat(person)
-
-    response.json(person)
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
 })
 
 const PORT = process.env.PORT || 3001
