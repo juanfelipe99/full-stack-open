@@ -52,7 +52,7 @@ app.get('/api/persons/:id', (request, response) => {
 app.delete('/api/persons/:id', (request, response) => {
     const id = request.params.id
     console.log(`deleting id ${id} in backend`)
-    Person.findByIdAndRemove(id)
+    Person.findByIdAndDelete(id)
         .then(() => {
             response.status(204).end()
         })
