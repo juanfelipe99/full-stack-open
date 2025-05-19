@@ -36,16 +36,17 @@ app.get('/api/persons/:id', (request, response) => {
     const id = request.params.id
     Person.findById(id)
     .then(person => {
-        if (person === null) {
-            return response.status(404).send('<h1>Person Not Found</h1>')
-        } else {
+        if (person){
             console.log(`found person ${person.name} with id ${id}`)
+            response.json(person)
+        } else {
+            console.log(`person with id ${id} not found`)
+            response.status(404).send('<h1>Person Not Found</h1>')
         }
-        response.json(person)
     })
     .catch(error => {
         console.log(error)
-        response.status(404).send('<h1>Person Not Found</h1>')
+        response.status(400).send('<h1>malformatted id</h1>')
     })
 })
 
