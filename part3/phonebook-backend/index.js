@@ -57,17 +57,14 @@ app.get('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
     const id = request.params.id
     console.log(`deleting id ${id} in backend`)
     Person.findByIdAndDelete(id)
         .then(() => {
             response.status(204).end()
         })
-        .catch(error => {
-            console.log(error)
-            response.status(404).send({ error: 'Person not found' })
-        })
+        .catch(error => next(error))
 })
 
 const generateId = () => {
