@@ -16,14 +16,14 @@ const personSchema = new mongoose.Schema({
 const Person = mongoose.model('Person', personSchema)
 
 if (process.argv.length < 4) {
-    console.log('phonebook:')
-    Person.find({}).then(result => {
-        result.forEach(person => {
-            console.log(person)
-        })
-        mongoose.connection.close()
+  console.log('phonebook:')
+  Person.find({}).then(result => {
+    result.forEach(person => {
+      console.log(person)
     })
-    return;
+    mongoose.connection.close()
+  })
+  return
 }
 
 const personName = process.argv[3]
