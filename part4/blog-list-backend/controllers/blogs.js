@@ -9,6 +9,11 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.post('/', async (request, response) => {
   try {
     const blog = new Blog(request.body)
+
+    if (!blog.title || !blog.author || !blog.url) {
+      return response.status(400).json({ error: 'Title, author, and url are required' })
+    }
+
     const blogPosted = await blog.save()
     response.status(201).json(blogPosted)
   } catch (error) {
