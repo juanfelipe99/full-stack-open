@@ -43,6 +43,19 @@ test('blogs have id field', async () => {
   })
 })
 
+test('a valid blog can be added', async () => {
+  const newBlog = { 'title': 'book3', 'author': 'author3', 'url': 'url3' }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+  assert.strictEqual(response.body.length, 3)
+  assert.strictEqual(response.body[2].title, 'book3')
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
