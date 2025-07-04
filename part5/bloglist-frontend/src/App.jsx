@@ -8,6 +8,7 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -16,6 +17,9 @@ const App = () => {
       const user = await loginService.login({
         username, password,
       })
+
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
+      blogService.setToken(user.token)
       setUser(user)
       setUsername('')
       setPassword('')
@@ -33,9 +37,19 @@ const App = () => {
     )  
   }, [])
 
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
+  }, [])
+
   const loginForm = () => (
     <div>
       <h2>Log in to application</h2>
+      {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
       <p>Use the form below to log in.</p>
       <form onSubmit={handleLogin}>
         <div>
@@ -61,15 +75,26 @@ const App = () => {
     </div>
   )
 
-  const blogForm = () => (
-    <div>
+  const blogForm = () => {
+    const userBlogs = blogs.filter(blog => {
+      return blog.user && blog.user.username === user.username
+    })
+    
+    return (
       <div>
-        {blogs.map(blog => 
-          <Blog key={blog.id} blog={blog} />
-        )}
+        <h3>My Blogs</h3>
+        <div>
+          {userBlogs.length > 0 ? (
+            userBlogs.map(blog => 
+              <Blog key={blog.id} blog={blog} />
+            )
+          ) : (
+            <p>You haven't created any blogs yet.</p>
+          )}
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div>
@@ -78,6 +103,10 @@ const App = () => {
       <div>
         <h2>Blogs</h2>
         <p>{user.name} logged in</p>
+        <button onClick={() => {
+          window.localStorage.removeItem('loggedBlogappUser')
+          setUser(null)
+        }}>logout</button>
         {blogForm()}
       </div>
     }
