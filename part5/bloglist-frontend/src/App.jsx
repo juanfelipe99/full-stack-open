@@ -75,6 +75,95 @@ const App = () => {
     </div>
   )
 
+  const handleCreateNewBlog = async (newBlog) => {
+    try {
+      // Verificar que tenemos un usuario y token válido
+      if (!user || !user.token) {
+        setErrorMessage('Please log in again')
+        setUser(null)
+        window.localStorage.removeItem('loggedBlogappUser')
+        return
+      }
+      
+      // Asegurar que el token esté configurado antes de crear el blog
+      blogService.setToken(user.token)
+      
+      const createdBlog = await blogService.create(newBlog)
+      
+      // Refrescar la lista completa de blogs desde el servidor
+      const updatedBlogs = await blogService.getAll()
+      setBlogs(updatedBlogs)
+      
+      setErrorMessage(`A new blog "${createdBlog.title}" by ${createdBlog.author} added`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    } catch (exception) {
+      console.error('Full error object:', exception)
+      console.error('Error response:', exception.response?.data)
+      
+      // Si el token es inválido, forzar re-login
+      if (exception.response?.data?.error === 'invalid token') {
+        setErrorMessage('Session expired. Please log in again.')
+        setUser(null)
+        window.localStorage.removeItem('loggedBlogappUser')
+      } else {
+        const errorMsg = exception.response?.data?.error || 'Failed to create blog'
+        setErrorMessage(errorMsg)
+      }
+      
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
+  const createNew = () => {
+    return (
+      <div>
+        <h2>Create New Blog</h2>
+        <form onSubmit={(event) => {
+          event.preventDefault()
+          const newBlog = {
+            title: event.target.title.value.trim(),
+            author: event.target.author.value.trim(),
+            url: event.target.url.value.trim(),
+            likes: event.target.likes.value ? parseInt(event.target.likes.value) : 0,
+          }
+          
+          // Validar que los campos requeridos no estén vacíos
+          if (!newBlog.title || !newBlog.author || !newBlog.url) {
+            setErrorMessage('Title, author, and URL are required')
+            setTimeout(() => setErrorMessage(null), 5000)
+            return
+          }
+          
+          console.log('Sending blog object:', newBlog)
+          handleCreateNewBlog(newBlog)
+          event.target.reset()
+        }}>
+          <div>
+            title
+            <input type="text" name="title" required />
+          </div>
+          <div>
+            author
+            <input type="text" name="author" required />
+          </div>
+          <div>
+            url
+            <input type="text" name="url" required />
+          </div>
+          <div>
+            likes
+            <input type="number" name="likes" defaultValue="0" />
+          </div>
+          <button type="submit">create</button>
+        </form>
+      </div>
+    )
+  }
+
   const blogForm = () => {
     const userBlogs = blogs.filter(blog => {
       return blog.user && blog.user.username === user.username
@@ -107,6 +196,7 @@ const App = () => {
           window.localStorage.removeItem('loggedBlogappUser')
           setUser(null)
         }}>logout</button>
+        {createNew()}
         {blogForm()}
       </div>
     }
