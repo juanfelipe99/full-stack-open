@@ -9,6 +9,7 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -23,6 +24,8 @@ const App = () => {
       setUser(user)
       setUsername('')
       setPassword('')
+      setErrorMessage(null)
+      setSuccessMessage(null)
     } catch (exception) {
       setErrorMessage('Wrong credentials')
       setTimeout(() => {
@@ -50,6 +53,7 @@ const App = () => {
     <div>
       <h2>Log in to application</h2>
       {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
+      {successMessage && <div style={{color: 'green'}}>{successMessage}</div>}
       <p>Use the form below to log in.</p>
       <form onSubmit={handleLogin}>
         <div>
@@ -94,9 +98,9 @@ const App = () => {
       const updatedBlogs = await blogService.getAll()
       setBlogs(updatedBlogs)
       
-      setErrorMessage(`A new blog "${createdBlog.title}" by ${createdBlog.author} added`)
+      setSuccessMessage(`A new blog "${createdBlog.title}" by ${createdBlog.author} added`)
       setTimeout(() => {
-        setErrorMessage(null)
+        setSuccessMessage(null)
       }, 5000)
     } catch (exception) {
       console.error('Full error object:', exception)
@@ -191,10 +195,14 @@ const App = () => {
       loginForm() :
       <div>
         <h2>Blogs</h2>
+        {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
+        {successMessage && <div style={{color: 'green'}}>{successMessage}</div>}
         <p>{user.name} logged in</p>
         <button onClick={() => {
           window.localStorage.removeItem('loggedBlogappUser')
           setUser(null)
+          setErrorMessage(null)
+          setSuccessMessage(null)
         }}>logout</button>
         {createNew()}
         {blogForm()}
