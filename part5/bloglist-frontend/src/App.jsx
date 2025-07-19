@@ -173,7 +173,7 @@ const App = () => {
         <h3>My Blogs</h3>
         <div>
           {userBlogs.length > 0 ? (
-            userBlogs.map(blog => 
+            userBlogs.sort((a, b) => b.likes - a.likes).map(blog => 
               <Blog key={blog.id} blog={blog} onLike={handleLike} />
             )
           ) : (
