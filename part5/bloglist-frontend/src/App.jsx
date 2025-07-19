@@ -189,7 +189,7 @@ const App = () => {
               <Blog key={blog.id} blog={blog} onLike={handleLike} onDelete={handleDelete} user={user} />
             )
           ) : (
-            <p>You haven't created any blogs yet.</p>
+            <p>You have not created any blogs yet.</p>
           )}
         </div>
       </div>

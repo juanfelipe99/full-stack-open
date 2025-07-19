@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import blogService from '../services/blogs'
+import PropTypes from 'prop-types'
 
 const getUserId = (userObj) => {
   if (!userObj) return null
@@ -50,6 +51,13 @@ const Blog = ({ blog, onLike, onDelete, user }) => {
       )}
     </div>
   )
+
+  Blog.propTypes = {
+    blog: PropTypes.object.isRequired,
+    onLike: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
+    user: PropTypes.object.isRequired
+  }
 }
 
 export default Blog
