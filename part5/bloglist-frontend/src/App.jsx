@@ -143,6 +143,18 @@ const App = () => {
     }
   }
 
+  const handleDelete = async (id) => {
+    try {
+      await blogService.remove(id, { headers: { Authorization: user ? `Bearer ${user.token}` : '' } })
+      setBlogs(blogs.filter(b => b.id !== id))
+      setSuccessMessage('Blog deleted successfully')
+      setTimeout(() => setSuccessMessage(null), 5000)
+    } catch (error) {
+      setErrorMessage('Error deleting blog')
+      setTimeout(() => setErrorMessage(null), 5000)
+    }
+  }
+
   const createNew = () => {
     const hideWhenVisible = { display: createNewBlogVisible ? 'none' : ''}
     const showWhenVisible = { display: createNewBlogVisible ? '' : 'none'}
@@ -174,7 +186,7 @@ const App = () => {
         <div>
           {userBlogs.length > 0 ? (
             userBlogs.sort((a, b) => b.likes - a.likes).map(blog => 
-              <Blog key={blog.id} blog={blog} onLike={handleLike} />
+              <Blog key={blog.id} blog={blog} onLike={handleLike} onDelete={handleDelete} user={user} />
             )
           ) : (
             <p>You haven't created any blogs yet.</p>

@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import blogService from '../services/blogs'
 
-const Blog = ({ blog, onLike }) => {
+const getUserId = (userObj) => {
+  if (!userObj) return null
+  if (typeof userObj === 'string') return userObj
+  return userObj.id || userObj._id
+}
+
+const Blog = ({ blog, onLike, onDelete, user }) => {
   const [showDetails, setShowDetails] = useState(false)
 
   const handleLike = async () => {
@@ -13,6 +19,15 @@ const Blog = ({ blog, onLike }) => {
     await blogService.update(blog.id, updatedBlog)
     if (onLike) onLike(blog.id)
   }
+
+  const handleDelete = () => {
+    if (window.confirm(`Delete blog "${blog.title}" by ${blog.author}?`)) {
+      if (onDelete) onDelete(blog.id)
+    }
+  }
+
+  // Comparación robusta de usuario
+  const canDelete = user && getUserId(blog.user) === user.id;
 
   return (
     <div style={{ border: '2px solid black', borderRadius: '6px', padding: '16px' }}>
@@ -28,7 +43,9 @@ const Blog = ({ blog, onLike }) => {
             Likes: {blog.likes}
             <button onClick={handleLike}>like</button>
           </div>
-          <div>{blog.user.name}</div>
+          {canDelete && (
+            <button onClick={handleDelete} style={{ background: 'red', color: 'white', marginTop: '8px' }}>delete</button>
+          )}
         </div>
       )}
     </div>
