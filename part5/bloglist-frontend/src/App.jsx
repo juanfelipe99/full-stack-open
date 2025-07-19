@@ -124,6 +124,25 @@ const App = () => {
     }
   }
 
+  const handleLike = async (id) => {
+    const blogToLike = blogs.find(b => b.id === id)
+    if (!blogToLike) return
+    const updatedBlog = {
+      ...blogToLike,
+      likes: (blogToLike.likes || 0) + 1,
+      user: blogToLike.user.id || blogToLike.user
+    }
+    try {
+      const returnedBlog = await blogService.update(id, updatedBlog)
+      // Asegura que user sea el objeto original, no solo el id
+      returnedBlog.user = blogToLike.user
+      setBlogs(blogs.map(b => b.id === id ? returnedBlog : b))
+    } catch (error) {
+      setErrorMessage('Error updating likes')
+      setTimeout(() => setErrorMessage(null), 5000)
+    }
+  }
+
   const createNew = () => {
     const hideWhenVisible = { display: createNewBlogVisible ? 'none' : ''}
     const showWhenVisible = { display: createNewBlogVisible ? '' : 'none'}
@@ -155,7 +174,7 @@ const App = () => {
         <div>
           {userBlogs.length > 0 ? (
             userBlogs.map(blog => 
-              <Blog key={blog.id} blog={blog} />
+              <Blog key={blog.id} blog={blog} onLike={handleLike} />
             )
           ) : (
             <p>You haven't created any blogs yet.</p>
@@ -166,7 +185,7 @@ const App = () => {
   }
 
   return (
-    <div>
+    <div style={{ border: '2px solid black', borderRadius: '6px', padding: '16px' }}>
       {user === null ?
       loginForm() :
       <div>
