@@ -31,18 +31,17 @@ const Blog = ({ blog, onLike, onDelete, user }) => {
   const canDelete = user && getUserId(blog.user) === user.id;
 
   return (
-    <div style={{ border: '2px solid black', borderRadius: '6px', padding: '16px' }}>
-      <div>{blog.title}</div>
+    <div className="blog" style={{ border: '2px solid black', borderRadius: '6px', padding: '16px' }}>
+      <div className="blog-title">Title: {blog.title}</div>
+      <div className="blog-author">Author: {blog.author}</div>
       <button onClick={() => setShowDetails(!showDetails)}>
         {showDetails ? 'Hide details' : 'Show details'}
       </button>
       {showDetails && (
-        <div>
-          <div>Author: {blog.author}</div>
-          <div>URL: {blog.url}</div>
-          <div>
-            Likes: {blog.likes}
-            <button onClick={handleLike}>like</button>
+        <div className="blog-details">
+          <div className="blog-url">URL: {blog.url}</div>
+          <div className="blog-likes">
+            Likes: {blog.likes} <button onClick={handleLike}>like</button>
           </div>
           {canDelete && (
             <button onClick={handleDelete} style={{ background: 'red', color: 'white', marginTop: '8px' }}>delete</button>
@@ -51,13 +50,13 @@ const Blog = ({ blog, onLike, onDelete, user }) => {
       )}
     </div>
   )
+}
 
-  Blog.propTypes = {
-    blog: PropTypes.object.isRequired,
-    onLike: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired
-  }
+Blog.propTypes = {
+  blog: PropTypes.object.isRequired,
+  onLike: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired
 }
 
 export default Blog
