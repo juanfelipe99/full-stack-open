@@ -102,7 +102,7 @@ describe('Blog app', () => {
       await expect(blogElement.getByText('Likes: 1')).toBeVisible()
     })
 
-    test.only('user who created a blog can delete it', async ({ page }) => {
+    test('user who created a blog can delete it', async ({ page }) => {
       // First, create a blog
       await page.getByRole('button', { name: 'create new' }).click()
       await page.locator('input[name="title"]').fill('Blog to Delete')
@@ -125,6 +125,48 @@ describe('Blog app', () => {
       
       // Verify the blog was deleted (no longer visible)
       await expect(page.getByText('Title: Blog to Delete')).not.toBeVisible()
+    })
+
+    test('only the user who created a blog can see the delete button', async ({ page, request }) => {
+      // Create a blog as testuser (first user)
+      await page.getByRole('button', { name: 'create new' }).click()
+      await page.locator('input[name="title"]').fill('Blog by First User')
+      await page.locator('input[name="author"]').fill('Test Author')
+      await page.locator('input[name="url"]').fill('http://testblog.com')
+      await page.getByRole('button', { name: 'create' }).click()
+      
+      // Wait for the blog to be created
+      await expect(page.getByText('Title: Blog by First User')).toBeVisible({ timeout: 10000 })
+      
+      // Verify the first user can see the delete button
+      const firstUserBlog = page.locator('.blog').filter({ hasText: 'Blog by First User' })
+      await firstUserBlog.getByRole('button', { name: 'Show details' }).click()
+      await expect(firstUserBlog.getByRole('button', { name: 'delete' })).toBeVisible()
+      
+      // Logout
+      await page.getByRole('button', { name: 'logout' }).click()
+      
+      // Create a second user
+      await request.post('http://localhost:3003/api/users', {
+        data: {
+          name: 'Second User',
+          username: 'seconduser',
+          password: 'testpass'
+        }
+      })
+      
+      // Login as the second user
+      await page.locator('input[name="Username"]').fill('seconduser')
+      await page.locator('input[name="Password"]').fill('testpass')
+      await page.getByRole('button', { name: 'login' }).click()
+      
+      // Wait for login
+      await page.waitForTimeout(2000)
+      
+      // Verify the second user does not see the first user's blog
+      // (since the app only shows "My Blogs")
+      await expect(page.getByText('Title: Blog by First User')).not.toBeVisible()
+      await expect(page.getByText('You have not created any blogs yet.')).toBeVisible()
     })
   })
 })
