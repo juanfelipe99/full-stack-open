@@ -101,5 +101,30 @@ describe('Blog app', () => {
       // Verify likes increased to 1
       await expect(blogElement.getByText('Likes: 1')).toBeVisible()
     })
+
+    test.only('user who created a blog can delete it', async ({ page }) => {
+      // First, create a blog
+      await page.getByRole('button', { name: 'create new' }).click()
+      await page.locator('input[name="title"]').fill('Blog to Delete')
+      await page.locator('input[name="author"]').fill('Test Author')
+      await page.locator('input[name="url"]').fill('http://testblog.com')
+      await page.getByRole('button', { name: 'create' }).click()
+      
+      // Wait for the blog to be created
+      await expect(page.getByText('Title: Blog to Delete')).toBeVisible({ timeout: 10000 })
+      
+      // Find the blog and click "Show details"
+      const blogElement = page.locator('.blog').filter({ hasText: 'Blog to Delete' })
+      await blogElement.getByRole('button', { name: 'Show details' }).click()
+      
+      // Set up dialog handler to accept the confirmation
+      page.on('dialog', dialog => dialog.accept())
+      
+      // Click the delete button
+      await blogElement.getByRole('button', { name: 'delete' }).click()
+      
+      // Verify the blog was deleted (no longer visible)
+      await expect(page.getByText('Title: Blog to Delete')).not.toBeVisible()
+    })
   })
 })
