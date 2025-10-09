@@ -61,7 +61,7 @@ describe('Blog app', () => {
       await page.waitForTimeout(2000)
     })
 
-    test.only('a new blog can be created', async ({ page }) => {
+    test('a new blog can be created', async ({ page }) => {
       // Click on "create new" button to show the form
       await page.getByRole('button', { name: 'create new' }).click()
       
@@ -73,22 +73,33 @@ describe('Blog app', () => {
       // Submit the form
       await page.getByRole('button', { name: 'create' }).click()
       
-      // Wait for the response
-      await page.waitForTimeout(3000)
-      
-      // Take a screenshot to see what's on the page
-      await page.screenshot({ path: 'test-results/after-create.png' })
-      
-      // Log the page content
-      const content = await page.content()
-      console.log('Page content length:', content.length)
-      
-      // Check if there's an error message
-      const errorMsg = await page.locator('div').filter({ hasText: /error|Error|failed|Failed/i }).count()
-      console.log('Error messages found:', errorMsg)
-      
       // Verify the blog appears in the list by looking for the title
       await expect(page.getByText('Title: Test Blog Title')).toBeVisible({ timeout: 10000 })
+    })
+
+    test('a blog can be liked', async ({ page }) => {
+      // First, create a blog
+      await page.getByRole('button', { name: 'create new' }).click()
+      await page.locator('input[name="title"]').fill('Blog to Like')
+      await page.locator('input[name="author"]').fill('Test Author')
+      await page.locator('input[name="url"]').fill('http://testblog.com')
+      await page.getByRole('button', { name: 'create' }).click()
+      
+      // Wait for the blog to be created
+      await expect(page.getByText('Title: Blog to Like')).toBeVisible({ timeout: 10000 })
+      
+      // Find the blog and click "Show details"
+      const blogElement = page.locator('.blog').filter({ hasText: 'Blog to Like' })
+      await blogElement.getByRole('button', { name: 'Show details' }).click()
+      
+      // Verify initial likes are 0
+      await expect(blogElement.getByText('Likes: 0')).toBeVisible()
+      
+      // Click the like button
+      await blogElement.getByRole('button', { name: 'like' }).click()
+      
+      // Verify likes increased to 1
+      await expect(blogElement.getByText('Likes: 1')).toBeVisible()
     })
   })
 })
