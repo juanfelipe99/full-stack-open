@@ -168,5 +168,46 @@ describe('Blog app', () => {
       await expect(page.getByText('Title: Blog by First User')).not.toBeVisible()
       await expect(page.getByText('You have not created any blogs yet.')).toBeVisible()
     })
+
+    test.only('blogs are ordered according to likes, with the blog with most likes first', async ({ page }) => {
+      // Create multiple blogs with different like counts
+      
+      // Create first blog
+      await page.getByRole('button', { name: 'create new' }).click()
+      await page.locator('input[name="title"]').fill('Blog with few likes')
+      await page.locator('input[name="author"]').fill('Test Author')
+      await page.locator('input[name="url"]').fill('http://test1.com')
+      await page.locator('input[name="likes"]').fill('5')
+      await page.getByRole('button', { name: 'create' }).click()
+      await expect(page.getByText('Title: Blog with few likes')).toBeVisible({ timeout: 10000 })
+      await page.getByRole('button', { name: 'cancel' }).click()
+      
+      // Create second blog
+      await page.getByRole('button', { name: 'create new' }).click()
+      await page.locator('input[name="title"]').fill('Blog with most likes')
+      await page.locator('input[name="author"]').fill('Test Author')
+      await page.locator('input[name="url"]').fill('http://test2.com')
+      await page.locator('input[name="likes"]').fill('15')
+      await page.getByRole('button', { name: 'create' }).click()
+      await expect(page.getByText('Title: Blog with most likes')).toBeVisible({ timeout: 10000 })
+      await page.getByRole('button', { name: 'cancel' }).click()
+      
+      // Create third blog
+      await page.getByRole('button', { name: 'create new' }).click()
+      await page.locator('input[name="title"]').fill('Blog with medium likes')
+      await page.locator('input[name="author"]').fill('Test Author')
+      await page.locator('input[name="url"]').fill('http://test3.com')
+      await page.locator('input[name="likes"]').fill('10')
+      await page.getByRole('button', { name: 'create' }).click()
+      await expect(page.getByText('Title: Blog with medium likes')).toBeVisible({ timeout: 10000 })
+      
+      // Get all blog titles in order
+      const blogTitles = await page.locator('.blog-title').allTextContents()
+      
+      // Verify the order: most likes first (15), then medium (10), then few (5)
+      expect(blogTitles[0]).toContain('Blog with most likes')
+      expect(blogTitles[1]).toContain('Blog with medium likes')
+      expect(blogTitles[2]).toContain('Blog with few likes')
+    })
   })
 })
