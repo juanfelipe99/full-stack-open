@@ -23,7 +23,7 @@ export const setNotification = (message, timeInSeconds) => {
     dispatch(showNotification(message))
     setTimeout(() => {
       dispatch(clearNotification())
-    }, timeInSeconds * 1000)
+    }, timeInSeconds * 1000) // Convert seconds to milliseconds - excercise 6.19
   }
 }
 
