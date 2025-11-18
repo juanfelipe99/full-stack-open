@@ -7,16 +7,14 @@ export const getAllAnecdotes = async () => {
 }
 
 export const createAnecdote = async (newAnecdote) => {
-    if (newAnecdote.content.length < 5) {
-        throw new Error('Anecdote must be at least 5 characters long')
-    }
     const response = await fetch('http://localhost:3001/anecdotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newAnecdote),
     })
     if (!response.ok) {
-        throw new Error('Failed to create anecdote')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create anecdote')
     }
     return await response.json()
 }

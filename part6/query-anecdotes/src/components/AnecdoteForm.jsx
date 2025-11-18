@@ -11,6 +11,9 @@ const AnecdoteForm = () => {
     onSuccess: (newAnecdote) => {
       queryClient.invalidateQueries({ queryKey: ['anecdotes'] })
       setNotification(`you created '${newAnecdote.content}'`)
+    },
+    onError: (error) => {
+      setNotification(error.message)
     }
   })
 
